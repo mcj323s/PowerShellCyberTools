@@ -1,0 +1,38 @@
+param (
+    [string]$Path = ".\YourFilesFolder"  # Default path to analyze
+)
+
+# Function to analyze a file for malicious indicators
+function Analyze-FileForMaliciousIndicators {
+    param (
+        [string]$FilePath
+    )
+
+    # Read the file content
+    $fileContent = Get-Content $FilePath -Raw
+
+    # List of known malicious strings (this is an example, expand as needed)
+    $maliciousIndicators = @("malware_signature", "suspicious_string")
+
+    # Analyze the file for each indicator
+    foreach ($indicator in $maliciousIndicators) {
+        if ($fileContent -like "*$indicator*") {
+            Write-Host "Malicious indicator found in $FilePath: $indicator"
+            
+            # Generate a basic YARA rule (expand this to be more specific)
+            $ruleName = "Malicious_" + $indicator
+            $yaraRule = "rule $ruleName { strings: $a = '$indicator' condition: $a }"
+            Write-Host "Generated YARA Rule: `n$yaraRule"
+        }
+    }
+
+    # Add more analysis checks here...
+}
+
+# Find all files in the specified directory
+$files = Get-ChildItem -Path $Path -Recurse
+
+# Analyze each file
+foreach ($file in $files) {
+    Analyze-FileForMaliciousIndicators -FilePath $file.FullName
+}
