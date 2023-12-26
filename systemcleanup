@@ -1,0 +1,50 @@
+# PowerShell Script to Clean Up Computer with User Interface and Elevated Permissions
+
+# Function to Check and Run as Administrator
+function RunAsAdmin {
+    $currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
+    $currentPrincipal = New-Object Security.Principal.WindowsPrincipal($currentUser)
+    $adminRole = [Security.Principal.WindowsBuiltInRole]::Administrator
+    if (-not $currentPrincipal.IsInRole($adminRole)) {
+        # Relaunch as an administrator
+        Start-Process PowerShell -ArgumentList "-File `"$PSCommandPath`"" -Verb RunAs
+        Exit
+    }
+}
+
+# Invoke Run as Admin
+RunAsAdmin
+
+# Function to Show Progress Bar
+function Show-ProgressBar($activity) {
+    $progress = @{
+        Activity = $activity
+        Status   = "Running"
+        PercentComplete = -1
+    }
+    Write-Progress @progress
+}
+
+# Clearing Temporary Files
+Show-ProgressBar "Cleaning Temporary Files..."
+Remove-Item -Path "$env:TEMP\*" -Recurse -Force -ErrorAction SilentlyContinue
+
+# Clearing Windows Update Cache
+Show-ProgressBar "Cleaning Windows Update Cache..."
+Stop-Service -Name wuauserv -Force
+Remove-Item -Path "C:\Windows\SoftwareDistribution\Download\*" -Recurse -Force -ErrorAction SilentlyContinue
+Start-Service -Name wuauserv
+
+# Emptying Recycle Bin
+Show-ProgressBar "Emptying Recycle Bin..."
+Clear-RecycleBin -Force -ErrorAction SilentlyContinue
+
+# Optimizing Drives
+Show-ProgressBar "Optimizing Drives..."
+Optimize-Volume -DriveLetter C -ReTrim -Verbose
+
+# Clean System Files with Disk Cleanup
+Show-ProgressBar "Running Disk Cleanup..."
+cleanmgr /sagerun:1
+
+Write-Output "Cleanup Completed!"
