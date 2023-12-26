@@ -1,0 +1,27 @@
+# Function to analyze network ports
+function Analyze-NetworkPorts {
+    Write-Host "Analyzing Network Ports (TCP Connections)..."
+    Get-NetTCPConnection | Format-Table -AutoSize
+}
+
+# Function to analyze network sessions
+function Analyze-NetworkSessions {
+    Write-Host "Analyzing Network Sessions..."
+
+    Write-Host "TCP Sessions:"
+    Get-NetTCPEndpoint | Format-Table -AutoSize
+
+    Write-Host "UDP Sessions:"
+    Get-NetUDPEndpoint | Format-Table -AutoSize
+}
+
+# Function to analyze DNS requests
+function Analyze-DnsRequests {
+    Write-Host "Analyzing DNS Cache (Recent DNS Requests)..."
+    Get-DnsClientCache | Format-Table -AutoSize
+}
+
+# Run the analyses
+Analyze-NetworkPorts
+Analyze-NetworkSessions
+Analyze-DnsRequests
